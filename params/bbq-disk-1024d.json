@@ -1,0 +1,18 @@
+{
+  "dims": 1024,
+  "vector_index_type": "bbq_disk",
+  "number_of_shards": 1,
+  "number_of_replicas": 0,
+  "index_clients": 1,
+  "index_iterations": 1000,
+  "index_bulk_size": 1000,
+  "search_iterations": 10000,
+  "search_clients": 8,
+  "small_partitions": 100,
+  "medium_partitions": 20,
+  "large_partitions": 5,
+  "custom_routing": false,
+  "rescore_oversample": -1,
+  "paragraph_size": 1,
+  "enable_experimental_features": false
+}

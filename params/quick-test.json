@@ -1,0 +1,18 @@
+{
+  "dims": 128,
+  "vector_index_type": "bbq_flat",
+  "number_of_shards": 1,
+  "number_of_replicas": 0,
+  "index_clients": 1,
+  "index_iterations": 5,
+  "index_bulk_size": 100,
+  "search_iterations": 100,
+  "search_clients": 1,
+  "small_partitions": 5,
+  "medium_partitions": 2,
+  "large_partitions": 1,
+  "custom_routing": false,
+  "rescore_oversample": -1,
+  "paragraph_size": 1,
+  "enable_experimental_features": false
+}
