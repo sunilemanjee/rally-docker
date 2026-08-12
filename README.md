@@ -56,7 +56,64 @@ ES_URL=https://your-cluster-id.es.your-region.aws.elastic.cloud
 API_KEY=your-base64-encoded-api-key
 ```
 
-To create an API key in Kibana: **Stack Management → API Keys → Create API key** — grant `write` and `read` privileges on the `vectors-benchmark-*` index pattern.
+**Creating the API key** — run this against your cluster (Dev Tools in Kibana or `curl`):
+
+```json
+POST /_security/api_key
+{
+  "name": "esrally-random-vector",
+  "role_descriptors": {
+    "rally-access": {
+      "cluster": ["all"],
+      "indices": [
+        {
+          "names": ["*"],
+          "privileges": ["all"]
+        }
+      ],
+      "applications": [
+        {
+          "application": "kibana-.kibana",
+          "privileges": [
+            "read_onechat",
+            "space_read",
+            "feature_agentBuilder.all",
+            "feature_actions.read"
+          ],
+          "resources": ["space:default"]
+        }
+      ]
+    }
+  }
+}
+```
+
+The response contains an `encoded` field — that is your `API_KEY` value:
+
+```json
+{
+  "id": "abc123",
+  "name": "esrally-random-vector",
+  "encoded": "YVY1UWg1OEJ..."   <-- use this as API_KEY
+}
+```
+
+Using `curl`:
+
+```bash
+curl -u elastic:your-password \
+  -X POST "${ES_URL}/_security/api_key" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "esrally-random-vector",
+    "role_descriptors": {
+      "rally-access": {
+        "cluster": ["all"],
+        "indices": [{"names": ["*"], "privileges": ["all"]}]
+      }
+    }
+  }'
+```
 
 Load into your shell before running any Docker commands:
 
