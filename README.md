@@ -98,7 +98,7 @@ rally-docker/
 Strip `https://` from `ES_URL` and append `:443`:
 
 ```
-demo-c4ecc8.es.us-east-1.aws.elastic.cloud:443
+your-cluster-id.es.your-region.aws.elastic.cloud:443
 ```
 
 Or derive it in-shell:
