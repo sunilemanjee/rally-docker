@@ -43,14 +43,22 @@ git clone https://github.com/elastic/rally-tracks.git \
 
 ### 3. Cluster Credentials
 
-Credentials live in `variables.env`:
+`variables.env` is gitignored (contains secrets). Copy the template and fill in your values:
 
 ```bash
-ES_URL=https://demo-c4ecc8.es.us-east-1.aws.elastic.cloud
-API_KEY=<base64-encoded-api-key>
+cp variables.env.example variables.env
 ```
 
-Load them into your shell before running any Docker commands:
+Then edit `variables.env`:
+
+```bash
+ES_URL=https://your-cluster-id.es.your-region.aws.elastic.cloud
+API_KEY=your-base64-encoded-api-key
+```
+
+To create an API key in Kibana: **Stack Management → API Keys → Create API key** — grant `write` and `read` privileges on the `vectors-benchmark-*` index pattern.
+
+Load into your shell before running any Docker commands:
 
 ```bash
 source variables.env
