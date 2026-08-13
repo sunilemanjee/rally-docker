@@ -146,7 +146,7 @@ rally-docker/
 
 | Host path | Container path | Purpose |
 |---|---|---|
-| `~/Documents/GitHub/rally-tracks` | `/rally/tracks` | Track source files |
+| `./rally-tracks` | `/rally/tracks` | Track source files |
 | `./params` | `/rally/params` | Param JSON files |
 | `./myrally` | `/rally/.rally` | State, logs, results (persisted) |
 
@@ -169,11 +169,10 @@ ES_HOST=$(echo "$ES_URL" | sed 's|https://||'):443
 ```bash
 source variables.env
 
-TRACKS_DIR=~/Documents/GitHub/rally-tracks
 ES_HOST=$(echo "$ES_URL" | sed 's|https://||'):443
 
 docker run --rm \
-  -v "${TRACKS_DIR}:/rally/tracks:ro" \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/params:/rally/params:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
@@ -185,6 +184,29 @@ docker run --rm \
 ```
 
 > **Note:** `myrally/` must exist before running. Create it with `mkdir -p myrally`. Rally stores logs in `myrally/logs/` and results in `myrally/benchmarks/`.
+
+---
+
+## Smoke Test
+
+Run this first. `--test-mode` overrides all iteration counts internally — no params file needed. Confirms Docker, cluster auth, and track loading all work before committing to a full run.
+
+```bash
+source variables.env
+ES_HOST=$(echo "$ES_URL" | sed 's|https://||'):443
+
+docker run --rm \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
+  -v "$(pwd)/myrally:/rally/.rally" \
+  elastic/rally race \
+  --track-path=/rally/tracks/random_vector \
+  --pipeline=benchmark-only \
+  --target-hosts="${ES_HOST}" \
+  --client-options="use_ssl:true,verify_certs:true,api_key:'${API_KEY}'" \
+  --test-mode
+```
+
+`SUCCESS` at the end = everything works. Proceed to a full benchmark.
 
 ---
 
@@ -247,29 +269,6 @@ Default: `1 × 1000 × 1000 = 1,000,000 documents`
 
 ---
 
-## Smoke Test
-
-Verify connectivity, auth, and track loading before running a full benchmark. `--test-mode` overrides all iteration counts internally — no params file needed.
-
-```bash
-source variables.env
-ES_HOST=$(echo "$ES_URL" | sed 's|https://||'):443
-
-docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
-  -v "$(pwd)/myrally:/rally/.rally" \
-  elastic/rally race \
-  --track-path=/rally/tracks/random_vector \
-  --pipeline=benchmark-only \
-  --target-hosts="${ES_HOST}" \
-  --client-options="use_ssl:true,verify_certs:true,api_key:'${API_KEY}'" \
-  --test-mode
-```
-
-If it completes with `SUCCESS` — cluster auth, track parsing, and indexing/search all work. Then run a full benchmark using one of the params files below.
-
----
-
 ## Example Runs
 
 ### Inline Params
@@ -282,7 +281,7 @@ source variables.env
 ES_HOST=$(echo "$ES_URL" | sed 's|https://||'):443
 
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
   --track-path=/rally/tracks/random_vector \
@@ -295,7 +294,7 @@ docker run --rm \
 **Nightly benchmark (bbq_flat, 1024-dim):**
 ```bash
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
   --track-path=/rally/tracks/random_vector \
@@ -308,7 +307,7 @@ docker run --rm \
 **Nightly benchmark (bbq_disk, 1024-dim):**
 ```bash
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
   --track-path=/rally/tracks/random_vector \
@@ -335,7 +334,7 @@ source variables.env
 ES_HOST=$(echo "$ES_URL" | sed 's|https://||'):443
 
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/params:/rally/params:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
@@ -356,7 +355,7 @@ Matches the track's out-of-the-box defaults. Indexes 1M documents, runs 10K sear
 
 ```bash
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/params:/rally/params:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
@@ -377,7 +376,7 @@ Params: `dims=128, vector_index_type=bbq_flat, index_iterations=1000, index_bulk
 
 ```bash
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/params:/rally/params:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
@@ -398,7 +397,7 @@ Params: `dims=1024, vector_index_type=bbq_flat, index_iterations=1000, search_it
 
 ```bash
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/params:/rally/params:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
@@ -419,7 +418,7 @@ High-concurrency run with 3 shards, 4 index clients, 16 search clients. Measures
 
 ```bash
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/params:/rally/params:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
@@ -434,6 +433,64 @@ Params: `dims=128, number_of_shards=3, number_of_replicas=1, index_clients=4, in
 
 ---
 
+### Including and Excluding Tasks
+
+Control which phases of the benchmark run using `--include-tasks` and `--exclude-tasks`. Tasks are comma-separated.
+
+**Available tasks in the `index-and-search` challenge:**
+
+| Task | What it does |
+|---|---|
+| `random-indexing` | Bulk-index random vectors |
+| `refresh-after-index` | Force index refresh post-ingest |
+| `small-partition-search` | KNN search over small-tier partitions |
+| `medium-partition-search` | KNN search over medium-tier partitions |
+| `large-partition-search` | KNN search over large-tier partitions |
+
+**Search only — skip indexing (index already populated):**
+```bash
+docker run --rm \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
+  -v "$(pwd)/myrally:/rally/.rally" \
+  elastic/rally race \
+  --track-path=/rally/tracks/random_vector \
+  --pipeline=benchmark-only \
+  --target-hosts="${ES_HOST}" \
+  --client-options="use_ssl:true,verify_certs:true,api_key:'${API_KEY}'" \
+  --track-params="/rally/params/default-128d.json" \
+  --exclude-tasks="random-indexing,refresh-after-index"
+```
+
+**Index only — no search (populate data, benchmark search later):**
+```bash
+docker run --rm \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
+  -v "$(pwd)/myrally:/rally/.rally" \
+  elastic/rally race \
+  --track-path=/rally/tracks/random_vector \
+  --pipeline=benchmark-only \
+  --target-hosts="${ES_HOST}" \
+  --client-options="use_ssl:true,verify_certs:true,api_key:'${API_KEY}'" \
+  --track-params="/rally/params/default-128d.json" \
+  --include-tasks="random-indexing,refresh-after-index"
+```
+
+**Large partitions only — isolate one tier:**
+```bash
+docker run --rm \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
+  -v "$(pwd)/myrally:/rally/.rally" \
+  elastic/rally race \
+  --track-path=/rally/tracks/random_vector \
+  --pipeline=benchmark-only \
+  --target-hosts="${ES_HOST}" \
+  --client-options="use_ssl:true,verify_certs:true,api_key:'${API_KEY}'" \
+  --track-params="/rally/params/default-128d.json" \
+  --exclude-tasks="random-indexing,refresh-after-index,small-partition-search,medium-partition-search"
+```
+
+---
+
 ## Overriding Individual Params
 
 Combine a JSON file with inline overrides — inline values take precedence:
@@ -441,7 +498,7 @@ Combine a JSON file with inline overrides — inline values take precedence:
 ```bash
 # Use default-128d.json but override search iterations only
 docker run --rm \
-  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
   -v "$(pwd)/params:/rally/params:ro" \
   -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
