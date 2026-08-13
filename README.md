@@ -247,6 +247,29 @@ Default: `1 × 1000 × 1000 = 1,000,000 documents`
 
 ---
 
+## Smoke Test
+
+Verify connectivity, auth, and track loading before running a full benchmark. `--test-mode` overrides all iteration counts internally — no params file needed.
+
+```bash
+source variables.env
+ES_HOST=$(echo "$ES_URL" | sed 's|https://||'):443
+
+docker run --rm \
+  -v ~/Documents/GitHub/rally-tracks:/rally/tracks:ro \
+  -v "$(pwd)/myrally:/rally/.rally" \
+  elastic/rally race \
+  --track-path=/rally/tracks/random_vector \
+  --pipeline=benchmark-only \
+  --target-hosts="${ES_HOST}" \
+  --client-options="use_ssl:true,verify_certs:true,api_key:'${API_KEY}'" \
+  --test-mode
+```
+
+If it completes with `SUCCESS` — cluster auth, track parsing, and indexing/search all work. Then run a full benchmark using one of the params files below.
+
+---
+
 ## Example Runs
 
 ### Inline Params
