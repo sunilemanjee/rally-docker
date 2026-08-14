@@ -196,10 +196,8 @@ source variables.env
 ES_HOST=$(echo "$ES_URL" | sed 's|https://||'):443
 
 docker run --rm \
-  -v "$(pwd)/rally-tracks:/rally/tracks:ro" \
-  -v "$(pwd)/myrally:/rally/.rally" \
   elastic/rally race \
-  --track-path=/rally/tracks/random_vector \
+  --track=random_vector \
   --pipeline=benchmark-only \
   --target-hosts="${ES_HOST}" \
   --client-options="use_ssl:true,verify_certs:true,api_key:'${API_KEY}'" \
@@ -207,6 +205,8 @@ docker run --rm \
 ```
 
 `SUCCESS` at the end = everything works. Proceed to a full benchmark.
+
+> **Note:** This command lets Rally fetch the track from the official repository. To use the locally cloned `rally-tracks/` instead, swap `--track=random_vector` for `--track-path=/rally/tracks/random_vector` and add `-v "$(pwd)/rally-tracks:/rally/tracks:ro"`.
 
 ---
 
